@@ -50,6 +50,9 @@
             color: #fff;
         }
     }
+    &__main:disabled{
+        opacity: 0.5;
+    }
     &__secondary {
         .inner {
             background-color: $grey;
