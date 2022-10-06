@@ -1,84 +1,75 @@
 import './charList.scss';
-import { Component } from 'react/cjs/react.production.min';
+import React, { useEffect, useState } from 'react';
 import MarvelService from '../../services/MarvelService';
 import Loader from '../loader/Loader';
 import Error from '../error/Error';
 
-class CharList extends Component {
-    state = {
-        charList: [],
-        isLoading: false,
-        isError: false,
-        offset: 210,
-        isNewCharsLoading: false,
-        total: null
-    }
-    marvelService = new MarvelService()
+const  CharList = (props) => {
+    const [charList, setCharList] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
+    const [isError, setIsError] = useState(false)
+    const [isNewCharsLoading, setIsNewCharsLoading] = useState(false)
+    const [offset, setOffset] = useState(210)
+    const [total, setTotal] = useState(null)
+
+    const marvelService = new MarvelService()
     
-    onLoading = () =>{
-        this.setState(({
-            isLoading:true,
-            isError:false
-        }))
+    useEffect(()=>{
+        updateCharList()
+    },[])
+
+    const onLoading = () =>{
+        setIsError(false)
+        setIsLoading(true)
     }
 
-    onNewCharsLoading = () =>{
-        this.setState(({
-            isNewCharsLoading:true
-        }))
-    }
-    componentDidMount(){
-        this.updateCharList()
+    
+    const onNewCharsLoading = () =>{
+        setIsNewCharsLoading(true)
     }
 
-    onLoaded = ({newCharList,total}) =>{
-        this.setState(({offset,charList})=>({
-            isLoading:false,
-            isNewCharsLoading:false,
-            charList: [...charList, ...newCharList],
-            offset: offset + 9,
-            total: total 
-        }))
+    const onLoaded = ({newCharList,total}) =>{
+        setIsLoading(false)
+        setIsNewCharsLoading(false)
+        setCharList(charList => charList = [...charList, ...newCharList])
+        setOffset(offset => offset = offset + 9)
+        setTotal(total)
     }
 
-    onError = () =>{
-        this.setState(({
-            isLoading:false,
-            isError: true
-        }))
+    const onError = () =>{
+        setIsError(true)
+        setIsLoading(false)
     }
 
-    updateCharList = (offset) =>{
-        if(this.state.charList.length === 0){
-            this.onLoading()
+    const updateCharList = (offset) =>{
+        if(charList.length === 0){
+            onLoading()
         }
-        this.onNewCharsLoading()
-        this.marvelService.getAllCharacters(offset)
-                          .then(this.onLoaded)
-                          .catch(this.onError)
+        onNewCharsLoading()
+        marvelService.getAllCharacters(offset)
+                     .then(onLoaded)
+                     .catch(onError)
     }
-    render () {
-        const {charList, isError, isLoading, offset, isNewCharsLoading, total} = this.state
-        const {selectedChar, onSelectedChar} = this.props
+    
+    const {selectedChar, onSelectedChar} = props
 
-        const loader = isLoading ? <Loader/> : null
-        const content = !(isLoading || isError) && charList ? <View charList={charList} selectedChar={selectedChar} onSelectedChar={onSelectedChar}/> : null
-        const error = !isLoading && isError ? <Error/> : null
-        return (
-            <div className="char__list">
-                {error}
-                {loader}
-                {content}
-                {total > offset && <button disabled={isNewCharsLoading} 
-                        onClick={() => this.updateCharList(offset)} 
-                        className="button button__main button__long">
+    const loader = isLoading ? <Loader/> : null
+    const content = !(isLoading || isError) && charList ? <View charList={charList} selectedChar={selectedChar} onSelectedChar={onSelectedChar}/> : null
+    const error = !isLoading && isError ? <Error/> : null
+    return (
+        <div className="char__list">
+            {error}
+            {loader}
+            {content}
+            {total > offset && <button disabled={isNewCharsLoading} 
+                    onClick={() => updateCharList(offset)} 
+                    className="button button__main button__long">
 
-                    <div className="inner">load more</div>
-                </button>}
-            </div>
-            
-        )
-    }
+                <div className="inner">load more</div>
+            </button>}
+        </div>
+        
+    )
    
 }
 

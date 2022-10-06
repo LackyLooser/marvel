@@ -1,63 +1,48 @@
 import './charInfo.scss';
-import { Component } from 'react/cjs/react.production.min';
+import React, { useState, useEffect } from 'react';
 import MarvelService from '../../services/MarvelService';
 import Error from '../error/Error';
 import Loader from '../loader/Loader';
 import Skeleton from '../skeleton/Skeleton'
 
-class CharInfo extends Component {
-    state = {
-        char: null,
-        isLoading: false,
-        isError: false
-    }
+const CharInfo = ({selectedChar}) => {
+    const [char, setChar] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isError, setIsError] = useState(false)
 
-    componentDidMount(){
-        if(this.props.selectedChar){
-            this.updateChar(this.props.selectedChar)
+    useEffect(()=>{
+        if(selectedChar){
+            updateChar(selectedChar)
         }
+    },[selectedChar])
+
+    const onLoaded = (char) =>{
+        setChar(char)
+        setIsLoading(false)
     }
 
-    componentDidUpdate(prevProps){
-        if(this.props !== prevProps){
-            this.updateChar(this.props.selectedChar)
-        }
+    const onError = () =>{
+        setIsError(true)
+        setIsLoading(false)
     }
 
-    onLoaded = (char) =>{
-        this.setState(({
-            char,
-            isLoading: false
-        }))
+    const onLoading = () =>{
+        setIsError(false)
+        setIsLoading(true)
     }
 
-    onError = () =>{
-        this.setState(({
-            isError: true,
-            isLoading: false
-        }))
-    }
+    const marvelService = new MarvelService()
 
-    onLoading = () =>{
-        this.setState(({
-            isLoading: true,
-            isError: false
-        }))
-    }
-
-    marvelService = new MarvelService()
-
-    updateChar = (id) =>{
-        this.onLoading()
-        this.marvelService
-                .getCharacter(id)
-                .then(this.onLoaded)
-                .catch(this.onError)
+    const updateChar = (id) =>{
+        onLoading()
+        marvelService
+            .getCharacter(id)
+            .then(onLoaded)
+            .catch(onError)
         
     }
-    render(){
-        const {char, isLoading, isError} = this.state
-        const error = !isLoading && isError ? <Error/> : null
+    
+    const error = !isLoading && isError ? <Error/> : null
         const loading = isLoading ? <Loader/> : null
         const skeleton = !isLoading && !isError && !char ? <Skeleton/> : null
         const content = !isLoading && !isError && char ? <View char={char}/> : null
@@ -69,7 +54,6 @@ class CharInfo extends Component {
                 {content}
             </div>
         )
-    }
     
 }
 

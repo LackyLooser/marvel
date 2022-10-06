@@ -1,58 +1,51 @@
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 import MarvelService from '../../services/MarvelService';
-import { Component } from 'react/cjs/react.production.min';
+import React,{ useState, useEffect } from 'react';
 import Loader from '../loader/Loader';
 import Error from '../error/Error';
 
-class RandomChar extends Component {
-    state = {
-        char: {},
-        isLoading: false,
-        error: false
-    }
-    marvelService = new MarvelService()
-    componentDidMount(){
-        this.updateChar()
+const RandomChar = () => {
+    const [char , setChar] = useState({})
+    const [isLoading , setIsLoading] = useState(false)
+    const [isError , setIsError] = useState(false)
+
+    const marvelService = new MarvelService()
+
+    useEffect(()=>{
+        updateChar()
+    },[])
+
+    const onLoaded = (char) =>{
+        setChar(char)
+        setIsLoading(false)
     }
 
-    onLoaded = (char) =>{
-        this.setState(({
-            char,
-            isLoading: false
-        }))
+    const onError = () =>{
+        setIsLoading(false)
+        setIsError(true)
     }
 
-    onError = () =>{
-        this.setState(({
-            error: true,
-            isLoading: false
-        }))
+    const onLoading = () =>{
+        setIsLoading(true)
+        setIsError(false)
     }
-
-    onLoading = () =>{
-        this.setState(({
-            isLoading: true,
-            error: false
-        }))
-    }
-    updateChar = () =>{
-        this.onLoading()
+    const updateChar = () =>{
+        onLoading()
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000)
-        this.marvelService
+        marvelService
                 .getCharacter(id)
-                .then(this.onLoaded)
-                .catch(this.onError)
+                .then(onLoaded)
+                .catch(onError)
     }
-    render(){
-        const {char:{name,decoration,thumbnail,homepage,wiki},isLoading,error} = this.state
+        const {name,decoration,thumbnail,homepage,wiki} = char
         const noneImg = thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg'
         const styleImg = !noneImg ? 'cover' : 'unset'
         return (
             <div className="randomchar">
-                {error &&<Error/>}
+                {isError &&<Error/>}
                 {isLoading && <Loader/>}
-                {!isLoading && !error && <div className="randomchar__block">
+                {!isLoading && !isError && <div className="randomchar__block">
                     <img style={{objectFit: styleImg}} src={thumbnail} alt="Random character" className="randomchar__img"/>
                     <div className="randomchar__info">
                         <p className="randomchar__name">{name}</p>
@@ -77,14 +70,13 @@ class RandomChar extends Component {
                     <p className="randomchar__title">
                         Or choose another one
                     </p>
-                    <button disabled={isLoading} onClick={this.updateChar} className="button button__main">
+                    <button disabled={isLoading} onClick={updateChar} className="button button__main">
                         <div className="inner">try it</div>
                     </button>
                     <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
                 </div>
             </div>
         )
-    }
 }
 
 export default RandomChar;
