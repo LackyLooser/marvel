@@ -53,6 +53,7 @@ class CharInfo extends Component {
                 .getCharacter(id)
                 .then(this.onLoaded)
                 .catch(this.onError)
+        
     }
     render(){
         const {char, isLoading, isError} = this.state
@@ -76,7 +77,7 @@ const View = ({char}) =>{
     const {thumbnail, name, homepage, wiki, description, comics} = char
 
     let clazz = {objectFit: 'cover'}
-    if(thumbnail == "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"){
+    if(thumbnail === "http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"){
         clazz = {objectFit: 'unset'}
     }
     return (
@@ -102,7 +103,7 @@ const View = ({char}) =>{
                 <ul className="char__comics-list">
                     {comics.length > 0 ? null : 'There is no comics with this character'}
                     {comics.map((item, index) =>{
-                        if (index > 9) return
+                        if (index > 9) return null
                         return (
                             <li key={index} className="char__comics-item">
                                         {item.name}

@@ -47,7 +47,7 @@ class RandomChar extends Component {
     render(){
         const {char:{name,decoration,thumbnail,homepage,wiki},isLoading,error} = this.state
         const noneImg = thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg'
-        const styleImg = !noneImg ? 'cover' : 'contain'
+        const styleImg = !noneImg ? 'cover' : 'unset'
         return (
             <div className="randomchar">
                 {error &&<Error/>}
