@@ -1,33 +1,27 @@
-import AppHeader from "../appHeader/AppHeader";
-import RandomChar from "../randomChar/RandomChar";
-import CharList from "../charList/CharList";
-import CharInfo from "../charInfo/CharInfo";
 import decoration from '../../resources/img/vision.png';
 import React ,{ useState } from "react";
-import ErrorBoundry from "../errorBoundry/ErrorBoundry";
+import {Routes, Route } from "react-router-dom";
+
+import AppHeader from "../appHeader/AppHeader";
+import ComicPage from "../../page/ComicPage";
+import CharPage from "../../page/CharPage"
+import SinglePage from "../../page/SinglePage";
+import SingleComic from "../singleComic/SingleComic"
+import SingleCharacter from "../singleCharacter/SingleCharacter"
 const  App = () => {
-    const [selectedChar, seTSelectedChar] = useState(null)
-    const onSelectedChar = (selectedChar) =>{
-        seTSelectedChar(selectedChar)
-    }
+    
         return (
             <div className="app">
                 <AppHeader/>
                 <main>
-                    <ErrorBoundry>
-                        <RandomChar/>
-                    </ErrorBoundry>
+                    <Routes>
+                        <Route path="/" element={<CharPage />}/>
+                        <Route path="/comics" element={<ComicPage />}/>
+                        <Route path="/comics/:id" element={<SinglePage Component={SingleComic} dataType='comics'/>}/>
+                        <Route path="/characters/:id" element={<SinglePage Component={SingleCharacter} dataType='characters'/>}/>
+                    </Routes>
                     
-                    <div className="char__content">
-                        <ErrorBoundry>
-                            <CharList selectedChar={selectedChar} onSelectedChar={onSelectedChar}/>
-                        </ErrorBoundry>
-                        
-                        <ErrorBoundry>
-                            <CharInfo selectedChar={selectedChar}/>
-                        </ErrorBoundry>
-                        
-                    </div>
+                    
                     <img className="bg-decoration" src={decoration} alt="vision"/>
                 </main>
             </div>

@@ -1,28 +1,54 @@
-class MarvelService {
-    _baseUrl = 'https://gateway.marvel.com:443/v1/public/'
-    _apiKey = process.env.REACT_APP_MARVEL_API_KEY // api key here
-    
-    getResurce = async(url) =>{
-        const res = await fetch(url)
+import { useFetch } from "../components/hooks/useFetch"
 
-        if(!res.ok){
-           throw new Error(`По запросу на ${url} получина ожибка ${res.status}`)
-        }
-        return await res.json()
+const useMarvelService = () =>{
+    const _baseUrl = 'https://gateway.marvel.com:443/v1/public/'
+    const _apiKey = process.env.REACT_APP_MARVEL_API_KEY // api key here
+    
+    const {isLoading, isError, request, clearError} = useFetch()
+    
+    const getCharacter = async(id) =>{
+        const char = await request(`${_baseUrl}characters/${id}?${_apiKey}`)
+        return _transformChar(char.data.results[0])
     }
-    getCharacter = async(id) =>{
-        const char = await this.getResurce(`${this._baseUrl}characters/${id}?${this._apiKey}`)
-        return this._transformChar(char.data.results[0])
+
+    const getCharacterByName = async(name) =>{
+        const char = await request(`${_baseUrl}characters?name=${name}&${_apiKey}`)
+        return char.data.results
     }
-    getAllCharacters = async( offset = 0) => {
-        const chars = await this.getResurce(`${this._baseUrl}characters?limit=9&offset=${offset}&${this._apiKey}`)
+
+    const getAllCharacters = async( offset = 0) => {
+        const chars = await request(`${_baseUrl}characters?limit=9&offset=${offset}&${_apiKey}`)
         return {
-            newCharList: chars.data.results.map(this._transformChar),
+            newCharList: chars.data.results.map(_transformChar),
             total: chars.data.total
         }
     }
 
-    _transformChar = (char) =>{
+    const getComic = async(id) =>{
+        const comic = await request(`${_baseUrl}comics/${id}?${_apiKey}`)
+        return _transformComic(comic.data.results[0])
+    }
+    
+    const getAllComics = async( offset = 0, limit = 8) => {
+        const comics = await request(`${_baseUrl}comics?limit=${limit}&offset=${offset}&${_apiKey}`)
+        return {
+            newComicsList: comics.data.results.map(_transformComic),
+            total: comics.data.total
+        }
+    }
+
+    const _transformComic = (comics) => {
+        return {
+            id: comics.id,
+            title: comics.title,
+            description: comics.description || 'There is no description',
+            pageCount: comics.pageCount ? `${comics.pageCount} p.` : 'No information about the number of pages',
+            thumbnail: comics.thumbnail.path + '.' + comics.thumbnail.extension,
+            language: comics.textObjects.language || 'en-us',
+            price: comics.prices[0].price ? `${comics.prices[0].price}$` : 'not available'
+        }
+    }
+    const _transformChar = (char) =>{
         return {
             id: char.id,
             name: char.name,
@@ -33,6 +59,7 @@ class MarvelService {
             wiki: char.urls[1].url
         }
     }
+    return {isLoading, isError, clearError, getCharacter, getAllCharacters, getComic, getAllComics, getCharacterByName}
 }
 
-export default MarvelService;
+export default useMarvelService;

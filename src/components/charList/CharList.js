@@ -3,58 +3,38 @@ import React, { useEffect, useState } from 'react';
 import MarvelService from '../../services/MarvelService';
 import Loader from '../loader/Loader';
 import Error from '../error/Error';
+import useMarvelService from '../../services/MarvelService';
 
 const  CharList = (props) => {
     const [charList, setCharList] = useState([])
-    const [isLoading, setIsLoading] = useState(false)
-    const [isError, setIsError] = useState(false)
     const [isNewCharsLoading, setIsNewCharsLoading] = useState(false)
     const [offset, setOffset] = useState(210)
     const [total, setTotal] = useState(null)
+    const {isError, isLoading, getAllCharacters} = useMarvelService()
 
-    const marvelService = new MarvelService()
     
     useEffect(()=>{
         updateCharList()
     },[])
 
-    const onLoading = () =>{
-        setIsError(false)
-        setIsLoading(true)
-    }
-
-    
-    const onNewCharsLoading = () =>{
-        setIsNewCharsLoading(true)
-    }
-
     const onLoaded = ({newCharList,total}) =>{
-        setIsLoading(false)
         setIsNewCharsLoading(false)
         setCharList(charList => charList = [...charList, ...newCharList])
         setOffset(offset => offset = offset + 9)
         setTotal(total)
     }
 
-    const onError = () =>{
-        setIsError(true)
-        setIsLoading(false)
-    }
 
     const updateCharList = (offset) =>{
-        if(charList.length === 0){
-            onLoading()
-        }
-        onNewCharsLoading()
-        marvelService.getAllCharacters(offset)
+        setIsNewCharsLoading(true)
+        getAllCharacters(offset)
                      .then(onLoaded)
-                     .catch(onError)
     }
     
     const {selectedChar, onSelectedChar} = props
 
-    const loader = isLoading ? <Loader/> : null
-    const content = !(isLoading || isError) && charList ? <View charList={charList} selectedChar={selectedChar} onSelectedChar={onSelectedChar}/> : null
+    const loader = isLoading && charList.length === 0 ? <Loader/> : null
+    const content = !isError && charList ? <View charList={charList} selectedChar={selectedChar} onSelectedChar={onSelectedChar}/> : null
     const error = !isLoading && isError ? <Error/> : null
     return (
         <div className="char__list">

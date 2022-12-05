@@ -4,11 +4,11 @@ import MarvelService from '../../services/MarvelService';
 import Error from '../error/Error';
 import Loader from '../loader/Loader';
 import Skeleton from '../skeleton/Skeleton'
+import useMarvelService from '../../services/MarvelService';
 
 const CharInfo = ({selectedChar}) => {
     const [char, setChar] = useState(null)
-    const [isLoading, setIsLoading] = useState(false)
-    const [isError, setIsError] = useState(false)
+    const {isError, isLoading, clearError, getCharacter} = useMarvelService()
 
     useEffect(()=>{
         if(selectedChar){
@@ -18,27 +18,13 @@ const CharInfo = ({selectedChar}) => {
 
     const onLoaded = (char) =>{
         setChar(char)
-        setIsLoading(false)
     }
 
-    const onError = () =>{
-        setIsError(true)
-        setIsLoading(false)
-    }
-
-    const onLoading = () =>{
-        setIsError(false)
-        setIsLoading(true)
-    }
-
-    const marvelService = new MarvelService()
 
     const updateChar = (id) =>{
-        onLoading()
-        marvelService
-            .getCharacter(id)
+        clearError()
+        getCharacter(id)
             .then(onLoaded)
-            .catch(onError)
         
     }
     
